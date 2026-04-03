@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oath ASC Market Alignment Evaluator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#F8FAF9;--sf:#FFFFFF;--sf2:#F1F5F3;--bd:#D9E2DD;--tx:#1A2B23;--txd:#5C7068;--txm:#8FA39A;--ev:#0D9668;--evd:#087A54;--evl:#10B981;--jun:#0D9668;--spr:#34D399;--red:#DC3545;--amb:#D4920A;--blu:#2E86AB;--pur:#7C5CBF}
+[data-theme="dark"]{--bg:#0F1613;--sf:#171F1B;--sf2:#1E2823;--bd:#2D3B35;--tx:#E4EBE8;--txd:#8FA39A;--txm:#5C7068}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;line-height:1.6}
+.header{background:#0D9668;color:#fff;padding:16px 24px 20px;position:relative}
+[data-theme="dark"] .header{background:#087A54}
+.header-inner{display:flex;justify-content:space-between;align-items:flex-start;max-width:1400px;margin:0 auto}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.weave{display:flex;gap:3px}
+.weave span{width:4px;height:18px;border-radius:1px}
+.weave span:nth-child(odd){background:#34D399}
+.weave span:nth-child(even){background:#A7F3D0}
+.logo-text{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7)}
+h1{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:22px;letter-spacing:-.5px}
+h1 span{color:#34D399}
+.header p{color:rgba(255,255,255,.65);font-size:12px;margin-top:3px}
+.header-btns{display:flex;gap:8px}
+.hbtn{padding:6px 12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600}
+.hbtn:hover{background:rgba(255,255,255,.25)}
+.layout{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 90px);max-width:1400px;margin:0 auto}
+.layout.single{grid-template-columns:1fr}
+@media(max-width:900px){.layout{grid-template-columns:1fr !important}}
+.panel-l{padding:20px;border-right:1px solid var(--bd);background:var(--sf);overflow-y:auto;max-height:calc(100vh - 90px)}
+.layout.single .panel-l{max-width:560px;margin:0 auto;border-right:none}
+.panel-r{padding:20px 24px;overflow-y:auto;max-height:calc(100vh - 90px)}
+.step-hd{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:14px;color:var(--ev);display:flex;align-items:center;gap:8px;margin-bottom:12px}
+[data-theme="dark"] .step-hd{color:var(--spr)}
+.step-num{width:22px;height:22px;border-radius:50%;background:rgba(13,150,104,.1);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--ev)}
+[data-theme="dark"] .step-num{background:rgba(13,150,104,.25);color:var(--spr)}
+.lbl{display:block;font-size:10px;font-weight:600;color:var(--txd);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+select,input[type="number"]{width:100%;padding:10px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:inherit;font-size:14px;outline:none;transition:border-color .2s}
+select:focus,input:focus{border-color:var(--ev);box-shadow:0 0 0 3px rgba(13,150,104,.1)}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235C7068' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.spec-btn{padding:9px 10px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;color:var(--txd);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:all .15s}
+.spec-btn.active{background:rgba(13,150,104,.08);border-color:var(--ev);color:var(--ev)}
+[data-theme="dark"] .spec-btn.active{background:rgba(13,150,104,.2);color:var(--spr)}
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pm-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.pm-lbl{font-size:9px;color:var(--txd);margin-bottom:2px;font-weight:700}
+.pm-inp{text-align:center;padding:7px 4px !important;font-size:13px !important}
+.btn-calc{width:100%;padding:13px;background:var(--ev);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px;margin-top:4px}
+.btn-calc:hover{background:var(--evl);box-shadow:0 4px 16px rgba(13,150,104,.25)}
+.btn-calc:disabled{background:var(--bd);cursor:not-allowed}
+[data-theme="dark"] .btn-calc:disabled{background:#2D3B35}
+.wi-badge{margin-top:8px;padding:7px 12px;background:rgba(13,150,104,.06);border-radius:8px;font-size:11px;color:var(--ev)}
+[data-theme="dark"] .wi-badge{background:rgba(13,150,104,.15);color:var(--spr)}
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--bd);background:transparent;color:var(--txd);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.tab-btn.active{border-color:var(--ev);background:rgba(13,150,104,.08);color:var(--ev)}
+[data-theme="dark"] .tab-btn.active{background:rgba(13,150,104,.2);color:var(--spr)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:16px}
+.card-title{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:15px;color:var(--evd);margin-bottom:14px}
+[data-theme="dark"] .card-title{color:var(--spr)}
+.metric-row{display:flex;gap:10px;flex-wrap:wrap}
+.metric{text-align:center;padding:14px 10px;background:var(--sf2);border-radius:10px;flex:1 1 130px;min-width:120}
+.metric .m-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--txd);margin-bottom:3px}
+.metric .m-val{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:20px;letter-spacing:-.5px}
+.dim-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.dim-card:hover{border-color:var(--txm)}
+.dim-card.expanded{border-color:var(--ev)}
+.dim-header{display:flex;justify-content:space-between;align-items:center}
+.dim-left{display:flex;align-items:center;gap:10px}
+.dim-name{font-weight:700;font-size:13px}
+.dim-wt{font-size:10px;color:var(--txm);font-weight:600}
+.dim-right{display:flex;align-items:center;gap:8px}
+.dim-bar{width:48px;height:6px;border-radius:3px;background:var(--sf2);overflow:hidden}
+.dim-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.dim-score{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:20px;min-width:30px;text-align:right}
+.dim-detail{margin-top:12px;font-size:12px;line-height:1.7;color:var(--txd)}
+.dim-detail p{margin-bottom:4px}
+.proc-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.proc-table th{text-align:left;padding:8px 6px;font-weight:600;color:var(--txd);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--bd)}
+.proc-table td{padding:9px 6px;border-bottom:1px solid var(--sf2)}
+.badge{padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
+.badge.yes{background:rgba(13,150,104,.1);color:var(--ev)}
+.badge.no{background:rgba(220,53,69,.08);color:var(--red)}
+.sens-table{width:100%;border-collapse:collapse;font-size:12px}
+.sens-table th{text-align:right;padding:7px 6px;font-weight:600;color:var(--txd);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--bd)}
+.sens-table th:first-child{text-align:left}
+.sens-table td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--sf2)}
+.sens-table td:first-child{text-align:left;font-weight:600}
+.sens-table tr.base{background:rgba(13,150,104,.04)}
+[data-theme="dark"] .sens-table tr.base{background:rgba(13,150,104,.08)}
+.formula{background:var(--sf2);border-radius:8px;padding:14px;margin:10px 0;font-family:'DM Sans',monospace;font-size:13px;line-height:1.8}
+.formula .hl{color:var(--ev);font-weight:700}
+[data-theme="dark"] .formula .hl{color:var(--spr)}
+.formula .dim-text{color:var(--txd)}
+.callout{border-radius:12px;padding:14px;font-size:12px;line-height:1.6;color:var(--txd);margin-top:16px}
+.callout.green{background:rgba(13,150,104,.04);border:1px solid rgba(13,150,104,.15)}
+.callout.amber{background:rgba(212,146,10,.06);border:1px solid rgba(212,146,10,.2)}
+.callout strong{color:var(--tx)}
+.weight-slider{width:100%;accent-color:var(--ev)}
+.footer{text-align:center;font-size:10px;color:var(--txm);padding:20px 0;line-height:1.6}
+.err{font-size:10px;color:var(--red);margin-top:3px}
+.hint{text-align:center;font-size:11px;color:var(--txm);margin-top:6px}
+.tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+.tooltip-wrap .tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1A2B23;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;line-height:1.4;white-space:normal;z-index:999;pointer-events:none;max-width:260px;min-width:160px}
+.tooltip-wrap:hover .tip{display:block}
+@media print{.header-btns,.panel-l,.tab-bar{display:none !important}.layout{grid-template-columns:1fr !important}.panel-r{max-height:none !important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const NBR=6411,LS=0.676,ACF=55.27;
+const calcWA=wi=>(LS*wi)+(1-LS);
+const calcMP=(wi,w)=>NBR*calcWA(wi)*w;
+const cl=(v,lo=0,hi=100)=>Math.max(lo,Math.min(hi,v));
+const fmt=n=>'$'+Math.round(n).toLocaleString('en-US');
+const fmtP=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
+const fmtK=n=>Math.abs(n)>=1000?'$'+(n/1000).toFixed(0)+'K':fmt(n);
+
+const SD={
+AL:{n:"Alabama",wi:0.8145,m:{Birmingham:{wi:0.8734},Huntsville:{wi:0.8289},Mobile:{wi:0.7812}},med:0.66,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:142,p:2.84,o:{i:.35,c:.45,h:.20}},d:{pop:5.07,g:-0.1,a:.36,u:.09,e:.49,ma:.48,ob:.369,ca:480,ms:.28},hc:.55,vb:35,rn:790,tk:32,cl:89,sg:22,ip:.45,pc:68,hp:"partial"},
+AK:{n:"Alaska",wi:1.2134,m:{Anchorage:{wi:1.2134}},med:0.72,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:18,p:2.43,o:{i:.45,c:.35,h:.20}},d:{pop:0.73,g:-0.3,a:.33,u:.11,e:.47,ma:.32,ob:.347,ca:420,ms:.25},hc:.65,vb:30,rn:880,tk:28,cl:127,sg:18,ip:.50,pc:72,hp:"full"},
+AZ:{n:"Arizona",wi:0.9462,m:{Phoenix:{wi:0.9671},Tucson:{wi:0.9178}},med:0.63,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:285,p:3.89,o:{i:.30,c:.50,h:.20}},d:{pop:7.43,g:1.4,a:.34,u:.08,e:.48,ma:.47,ob:.302,ca:400,ms:.26},hc:.50,vb:55,rn:820,tk:35,cl:103,sg:24,ip:.48,pc:65,hp:"partial"},
+AR:{n:"Arkansas",wi:0.7834,m:{LittleRock:{wi:0.8321}},med:0.64,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:95,p:3.14,o:{i:.40,c:.40,h:.20}},d:{pop:3.05,g:0.1,a:.36,u:.08,e:.46,ma:.42,ob:.371,ca:490,ms:.29},hc:.50,vb:30,rn:780,tk:30,cl:87,sg:20,ip:.42,pc:62,hp:"full"},
+CA:{n:"California",wi:1.2841,m:{LosAngeles:{wi:1.3156},SanFrancisco:{wi:1.4721},SanDiego:{wi:1.1934},Sacramento:{wi:1.1567}},med:0.58,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:890,p:2.27,o:{i:.25,c:.50,h:.25}},d:{pop:39.03,g:0.0,a:.33,u:.07,e:.44,ma:.49,ob:.268,ca:395,ms:.24},hc:.40,vb:70,rn:860,tk:38,cl:142,sg:28,ip:.38,pc:78,hp:"partial"},
+CO:{n:"Colorado",wi:1.0312,m:{Denver:{wi:1.0734},ColoradoSprings:{wi:0.9812}},med:0.60,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:195,p:3.35,o:{i:.35,c:.45,h:.20}},d:{pop:5.91,g:0.8,a:.33,u:.07,e:.53,ma:.43,ob:.248,ca:380,ms:.24},hc:.45,vb:68,rn:870,tk:36,cl:115,sg:26,ip:.50,pc:82,hp:"partial"},
+CT:{n:"Connecticut",wi:1.1789,m:{Hartford:{wi:1.1789},NewHaven:{wi:1.2134}},med:0.62,con:{r:1,d:"moderate",c:1},cr:{fp:0,s:40},asc:{t:72,p:2.00,o:{i:.30,c:.40,h:.30}},d:{pop:3.63,g:-0.2,a:.38,u:.04,e:.54,ma:.38,ob:.270,ca:440,ms:.27},hc:.60,vb:72,rn:950,tk:40,cl:131,sg:30,ip:.40,pc:90,hp:"none"},
+DE:{n:"Delaware",wi:1.0234,m:{Wilmington:{wi:1.0234}},med:0.64,con:{r:1,d:"moderate",c:1},cr:{fp:0,s:40},asc:{t:28,p:2.82,o:{i:.35,c:.45,h:.20}},d:{pop:1.01,g:0.6,a:.37,u:.05,e:.51,ma:.36,ob:.316,ca:460,ms:.27},hc:.70,vb:55,rn:910,tk:35,cl:108,sg:24,ip:.42,pc:75,hp:"partial"},
+FL:{n:"Florida",wi:0.9578,m:{Miami:{wi:1.0123},Tampa:{wi:0.9345},Orlando:{wi:0.9267},Jacksonville:{wi:0.9156}},med:0.60,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:485,p:2.17,o:{i:.28,c:.52,h:.20}},d:{pop:22.61,g:1.6,a:.36,u:.11,e:.44,ma:.54,ob:.288,ca:420,ms:.26},hc:.50,vb:55,rn:830,tk:34,cl:103,sg:25,ip:.45,pc:68,hp:"partial"},
+GA:{n:"Georgia",wi:0.9134,m:{Atlanta:{wi:0.9789},Savannah:{wi:0.8823}},med:0.62,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:210,p:1.92,o:{i:.32,c:.48,h:.20}},d:{pop:11.03,g:0.9,a:.33,u:.12,e:.48,ma:.44,ob:.334,ca:450,ms:.27},hc:.50,vb:45,rn:790,tk:32,cl:95,sg:23,ip:.43,pc:65,hp:"partial"},
+HI:{n:"Hawaii",wi:1.1423,m:{Honolulu:{wi:1.1423}},med:0.68,con:{r:1,d:"high",c:1},cr:{fp:1,s:100},asc:{t:22,p:1.52,o:{i:.30,c:.30,h:.40}},d:{pop:1.44,g:0.1,a:.35,u:.04,e:.52,ma:.38,ob:.256,ca:390,ms:.23},hc:.70,vb:50,rn:900,tk:33,cl:167,sg:22,ip:.35,pc:78,hp:"partial"},
+ID:{n:"Idaho",wi:0.8734,m:{Boise:{wi:0.9012}},med:0.63,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:48,p:2.52,o:{i:.45,c:.35,h:.20}},d:{pop:1.96,g:1.8,a:.34,u:.08,e:.50,ma:.40,ob:.298,ca:400,ms:.26},hc:.55,vb:40,rn:780,tk:28,cl:97,sg:19,ip:.52,pc:60,hp:"full"},
+IL:{n:"Illinois",wi:0.9978,m:{Chicago:{wi:1.0567},Springfield:{wi:0.8734}},med:0.60,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:310,p:2.44,o:{i:.30,c:.50,h:.20}},d:{pop:12.55,g:-0.3,a:.35,u:.07,e:.50,ma:.42,ob:.334,ca:450,ms:.27},hc:.45,vb:60,rn:860,tk:36,cl:100,sg:25,ip:.42,pc:75,hp:"partial"},
+IN:{n:"Indiana",wi:0.9156,m:{Indianapolis:{wi:0.9678}},med:0.63,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:165,p:2.43,o:{i:.38,c:.42,h:.20}},d:{pop:6.85,g:0.2,a:.36,u:.08,e:.51,ma:.44,ob:.364,ca:460,ms:.28},hc:.55,vb:50,rn:830,tk:34,cl:91,sg:22,ip:.45,pc:68,hp:"partial"},
+IA:{n:"Iowa",wi:0.8423,m:{DesMoines:{wi:0.8912}},med:0.68,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:85,p:2.68,o:{i:.42,c:.38,h:.20}},d:{pop:3.21,g:0.1,a:.36,u:.04,e:.54,ma:.42,ob:.360,ca:450,ms:.28},hc:.50,vb:55,rn:870,tk:34,cl:90,sg:21,ip:.48,pc:72,hp:"partial"},
+KS:{n:"Kansas",wi:0.8612,m:{KansasCity:{wi:0.9234},Wichita:{wi:0.8512}},med:0.66,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:78,p:2.66,o:{i:.40,c:.40,h:.20}},d:{pop:2.94,g:0.1,a:.35,u:.07,e:.52,ma:.40,ob:.350,ca:440,ms:.27},hc:.50,vb:45,rn:850,tk:32,cl:90,sg:21,ip:.47,pc:68,hp:"partial"},
+KY:{n:"Kentucky",wi:0.8478,m:{Louisville:{wi:0.9012},Lexington:{wi:0.8567}},med:0.66,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:98,p:2.18,o:{i:.35,c:.45,h:.20}},d:{pop:4.53,g:0.0,a:.37,u:.05,e:.48,ma:.46,ob:.378,ca:500,ms:.30},hc:.55,vb:40,rn:820,tk:31,cl:90,sg:21,ip:.40,pc:65,hp:"full"},
+LA:{n:"Louisiana",wi:0.8567,m:{NewOrleans:{wi:0.8912},BatonRouge:{wi:0.8234}},med:0.64,con:{r:1,d:"moderate",c:1},cr:{fp:0,s:40},asc:{t:135,p:2.91,o:{i:.35,c:.45,h:.20}},d:{pop:4.62,g:-0.2,a:.35,u:.07,e:.46,ma:.47,ob:.376,ca:480,ms:.28},hc:.50,vb:35,rn:790,tk:30,cl:92,sg:22,ip:.44,pc:63,hp:"full"},
+ME:{n:"Maine",wi:0.9378,m:{Portland:{wi:0.9567}},med:0.70,con:{r:1,d:"moderate",c:1},cr:{fp:1,s:100},asc:{t:25,p:1.83,o:{i:.35,c:.35,h:.30}},d:{pop:1.39,g:0.2,a:.40,u:.05,e:.48,ma:.38,ob:.308,ca:460,ms:.28},hc:.65,vb:58,rn:920,tk:34,cl:105,sg:22,ip:.42,pc:80,hp:"partial"},
+MD:{n:"Maryland",wi:1.0234,m:{Baltimore:{wi:1.0456},Bethesda:{wi:1.0812}},med:0.70,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:118,p:1.90,o:{i:.28,c:.42,h:.30}},d:{pop:6.22,g:0.3,a:.35,u:.06,e:.52,ma:.34,ob:.318,ca:440,ms:.26},hc:.55,vb:80,rn:900,tk:38,cl:118,sg:28,ip:.38,pc:85,hp:"partial"},
+MA:{n:"Massachusetts",wi:1.2345,m:{Boston:{wi:1.3012}},med:0.68,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:85,p:1.22,o:{i:.25,c:.35,h:.40}},d:{pop:7.03,g:0.2,a:.35,u:.03,e:.54,ma:.32,ob:.260,ca:440,ms:.25},hc:.60,vb:90,rn:1020,tk:42,cl:135,sg:32,ip:.35,pc:98,hp:"none"},
+MI:{n:"Michigan",wi:0.9523,m:{Detroit:{wi:1.0178},GrandRapids:{wi:0.9012}},med:0.62,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:220,p:2.20,o:{i:.32,c:.48,h:.20}},d:{pop:10.04,g:0.0,a:.37,u:.05,e:.50,ma:.44,ob:.358,ca:450,ms:.28},hc:.55,vb:55,rn:870,tk:35,cl:92,sg:24,ip:.42,pc:72,hp:"partial"},
+MN:{n:"Minnesota",wi:1.0023,m:{Minneapolis:{wi:1.0345}},med:0.72,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:125,p:2.19,o:{i:.35,c:.40,h:.25}},d:{pop:5.74,g:0.4,a:.35,u:.04,e:.56,ma:.44,ob:.310,ca:440,ms:.26},hc:.55,vb:85,rn:960,tk:38,cl:101,sg:26,ip:.45,pc:82,hp:"partial"},
+MS:{n:"Mississippi",wi:0.7612,m:{Jackson:{wi:0.7934}},med:0.64,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:62,p:2.11,o:{i:.38,c:.42,h:.20}},d:{pop:2.94,g:-0.3,a:.36,u:.11,e:.44,ma:.42,ob:.396,ca:490,ms:.30},hc:.50,vb:25,rn:750,tk:28,cl:84,sg:18,ip:.44,pc:58,hp:"full"},
+MO:{n:"Missouri",wi:0.8812,m:{KansasCity:{wi:0.9234},StLouis:{wi:0.9123}},med:0.64,con:{r:1,d:"moderate",c:1},cr:{fp:1,s:100},asc:{t:145,p:2.35,o:{i:.35,c:.45,h:.20}},d:{pop:6.19,g:0.1,a:.36,u:.08,e:.50,ma:.46,ob:.356,ca:460,ms:.28},hc:.50,vb:50,rn:840,tk:33,cl:90,sg:23,ip:.45,pc:70,hp:"partial"},
+MT:{n:"Montana",wi:0.8878,m:{Billings:{wi:0.9012}},med:0.70,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:22,p:1.99,o:{i:.50,c:.30,h:.20}},d:{pop:1.13,g:0.7,a:.37,u:.07,e:.48,ma:.38,ob:.280,ca:420,ms:.26},hc:.60,vb:40,rn:840,tk:28,cl:99,sg:18,ip:.55,pc:68,hp:"full"},
+NE:{n:"Nebraska",wi:0.8678,m:{Omaha:{wi:0.9123}},med:0.68,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:58,p:2.96,o:{i:.42,c:.38,h:.20}},d:{pop:1.97,g:0.3,a:.34,u:.06,e:.54,ma:.40,ob:.344,ca:440,ms:.27},hc:.55,vb:50,rn:870,tk:33,cl:92,sg:22,ip:.48,pc:72,hp:"partial"},
+NV:{n:"Nevada",wi:0.9878,m:{LasVegas:{wi:0.9956},Reno:{wi:0.9812}},med:0.58,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:85,p:2.68,o:{i:.30,c:.50,h:.20}},d:{pop:3.19,g:1.5,a:.34,u:.10,e:.47,ma:.46,ob:.288,ca:390,ms:.25},hc:.55,vb:40,rn:760,tk:30,cl:105,sg:20,ip:.45,pc:55,hp:"full"},
+NH:{n:"New Hampshire",wi:0.9378,m:{Manchester:{wi:0.9512},Lebanon:{wi:0.9378}},med:0.68,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:22,p:1.58,o:{i:.40,c:.35,h:.25}},d:{pop:1.40,g:0.4,a:.39,u:.05,e:.54,ma:.38,ob:.290,ca:450,ms:.27},hc:.65,vb:55,rn:920,tk:34,cl:112,sg:24,ip:.45,pc:82,hp:"partial"},
+NJ:{n:"New Jersey",wi:1.1234,m:{Newark:{wi:1.1567},Trenton:{wi:1.0812}},med:0.62,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:195,p:2.10,o:{i:.28,c:.48,h:.24}},d:{pop:9.29,g:0.2,a:.36,u:.07,e:.52,ma:.36,ob:.278,ca:450,ms:.26},hc:.45,vb:60,rn:890,tk:37,cl:123,sg:27,ip:.40,pc:80,hp:"partial"},
+NM:{n:"New Mexico",wi:0.8867,m:{Albuquerque:{wi:0.9012}},med:0.66,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:38,p:1.80,o:{i:.42,c:.38,h:.20}},d:{pop:2.12,g:0.3,a:.36,u:.09,e:.42,ma:.42,ob:.298,ca:400,ms:.26},hc:.55,vb:45,rn:780,tk:28,cl:95,sg:18,ip:.48,pc:62,hp:"full"},
+NY:{n:"New York",wi:1.1456,m:{NewYorkCity:{wi:1.3234},Buffalo:{wi:0.9234},Albany:{wi:0.9012}},med:0.62,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:235,p:1.20,o:{i:.22,c:.38,h:.40}},d:{pop:19.57,g:-0.3,a:.35,u:.06,e:.48,ma:.44,ob:.278,ca:460,ms:.26},hc:.45,vb:65,rn:880,tk:38,cl:130,sg:30,ip:.35,pc:88,hp:"partial"},
+NC:{n:"North Carolina",wi:0.9134,m:{Charlotte:{wi:0.9456},Raleigh:{wi:0.9234},Durham:{wi:0.9567}},med:0.65,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:225,p:2.13,o:{i:.32,c:.48,h:.20}},d:{pop:10.70,g:1.0,a:.35,u:.09,e:.48,ma:.46,ob:.340,ca:450,ms:.27},hc:.55,vb:55,rn:850,tk:34,cl:96,sg:24,ip:.43,pc:70,hp:"partial"},
+ND:{n:"North Dakota",wi:0.8512,m:{Fargo:{wi:0.8812}},med:0.72,con:{r:1,d:"moderate",c:1},cr:{fp:1,s:100},asc:{t:15,p:1.93,o:{i:.45,c:.35,h:.20}},d:{pop:0.78,g:0.5,a:.33,u:.06,e:.56,ma:.36,ob:.340,ca:420,ms:.26},hc:.65,vb:45,rn:920,tk:32,cl:93,sg:20,ip:.48,pc:72,hp:"partial"},
+OH:{n:"Ohio",wi:0.9234,m:{Columbus:{wi:0.9678},Cleveland:{wi:0.9812},Cincinnati:{wi:0.9512}},med:0.64,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:268,p:2.29,o:{i:.32,c:.48,h:.20}},d:{pop:11.78,g:-0.1,a:.37,u:.06,e:.50,ma:.46,ob:.358,ca:460,ms:.28},hc:.55,vb:58,rn:870,tk:36,cl:90,sg:24,ip:.42,pc:72,hp:"partial"},
+OK:{n:"Oklahoma",wi:0.8234,m:{OklahomaCity:{wi:0.8612},Tulsa:{wi:0.8334}},med:0.63,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:110,p:2.76,o:{i:.40,c:.40,h:.20}},d:{pop:4.02,g:0.3,a:.35,u:.12,e:.47,ma:.44,ob:.366,ca:460,ms:.28},hc:.50,vb:35,rn:770,tk:30,cl:88,sg:20,ip:.48,pc:62,hp:"full"},
+OR:{n:"Oregon",wi:1.0312,m:{Portland:{wi:1.0567}},med:0.62,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:82,p:1.94,o:{i:.38,c:.42,h:.20}},d:{pop:4.24,g:0.5,a:.36,u:.06,e:.48,ma:.48,ob:.298,ca:420,ms:.26},hc:.55,vb:72,rn:870,tk:34,cl:112,sg:24,ip:.48,pc:78,hp:"partial"},
+PA:{n:"Pennsylvania",wi:1.0012,m:{Philadelphia:{wi:1.0812},Pittsburgh:{wi:0.9567}},med:0.64,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:285,p:2.21,o:{i:.30,c:.48,h:.22}},d:{pop:12.96,g:0.0,a:.37,u:.05,e:.52,ma:.46,ob:.340,ca:460,ms:.28},hc:.50,vb:65,rn:910,tk:38,cl:100,sg:26,ip:.40,pc:78,hp:"partial"},
+RI:{n:"Rhode Island",wi:1.0812,m:{Providence:{wi:1.0812}},med:0.68,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:18,p:1.65,o:{i:.30,c:.35,h:.35}},d:{pop:1.10,g:0.1,a:.38,u:.04,e:.52,ma:.38,ob:.290,ca:450,ms:.27},hc:.70,vb:65,rn:930,tk:36,cl:107,sg:26,ip:.38,pc:85,hp:"none"},
+SC:{n:"South Carolina",wi:0.8812,m:{Charleston:{wi:0.9234},Columbia:{wi:0.8812}},med:0.64,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:115,p:2.20,o:{i:.35,c:.45,h:.20}},d:{pop:5.28,g:1.1,a:.37,u:.09,e:.47,ma:.48,ob:.348,ca:460,ms:.28},hc:.55,vb:40,rn:800,tk:32,cl:95,sg:22,ip:.44,pc:65,hp:"partial"},
+SDD:{n:"South Dakota",wi:0.8312,m:{SiouxFalls:{wi:0.8612}},med:0.70,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:18,p:2.01,o:{i:.45,c:.35,h:.20}},d:{pop:0.91,g:0.5,a:.34,u:.07,e:.54,ma:.38,ob:.340,ca:420,ms:.26},hc:.60,vb:45,rn:860,tk:30,cl:91,sg:20,ip:.50,pc:70,hp:"partial"},
+TN:{n:"Tennessee",wi:0.8912,m:{Nashville:{wi:0.9456},Memphis:{wi:0.8734}},med:0.64,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:178,p:2.56,o:{i:.32,c:.48,h:.20}},d:{pop:7.05,g:0.6,a:.36,u:.08,e:.49,ma:.48,ob:.368,ca:470,ms:.28},hc:.55,vb:45,rn:830,tk:33,cl:91,sg:23,ip:.43,pc:67,hp:"partial"},
+TX:{n:"Texas",wi:0.9534,m:{Houston:{wi:0.9934},DFW:{wi:0.9712},Austin:{wi:0.9456},SanAntonio:{wi:0.8912}},med:0.58,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:620,p:2.07,o:{i:.30,c:.50,h:.20}},d:{pop:30.03,g:1.5,a:.32,u:.16,e:.48,ma:.46,ob:.346,ca:420,ms:.26},hc:.45,vb:45,rn:790,tk:34,cl:95,sg:24,ip:.48,pc:62,hp:"partial"},
+UT:{n:"Utah",wi:0.9312,m:{SaltLakeCity:{wi:0.9567}},med:0.62,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:62,p:1.85,o:{i:.40,c:.40,h:.20}},d:{pop:3.42,g:1.5,a:.28,u:.08,e:.54,ma:.36,ob:.262,ca:370,ms:.23},hc:.60,vb:55,rn:800,tk:32,cl:101,sg:22,ip:.48,pc:68,hp:"partial"},
+VT:{n:"Vermont",wi:0.9378,m:{Burlington:{wi:0.9512}},med:0.72,con:{r:1,d:"moderate",c:1},cr:{fp:1,s:100},asc:{t:8,p:1.24,o:{i:.40,c:.20,h:.40}},d:{pop:0.65,g:0.0,a:.40,u:.04,e:.48,ma:.36,ob:.280,ca:440,ms:.27},hc:.75,vb:60,rn:930,tk:34,cl:112,sg:22,ip:.42,pc:88,hp:"partial"},
+VA:{n:"Virginia",wi:0.9712,m:{NoVA:{wi:1.0812},Richmond:{wi:0.9234},VirginiaBeach:{wi:0.8812}},med:0.64,con:{r:1,d:"moderate",c:1},cr:{fp:0,s:40},asc:{t:185,p:2.12,o:{i:.30,c:.48,h:.22}},d:{pop:8.68,g:0.5,a:.35,u:.07,e:.52,ma:.42,ob:.316,ca:430,ms:.26},hc:.50,vb:62,rn:870,tk:36,cl:105,sg:26,ip:.42,pc:75,hp:"partial"},
+WA:{n:"Washington",wi:1.0678,m:{Seattle:{wi:1.1234},Spokane:{wi:0.9312}},med:0.62,con:{r:1,d:"moderate",c:1},cr:{fp:1,s:100},asc:{t:118,p:1.52,o:{i:.32,c:.42,h:.26}},d:{pop:7.81,g:0.8,a:.34,u:.06,e:.50,ma:.46,ob:.290,ca:420,ms:.25},hc:.50,vb:70,rn:880,tk:36,cl:118,sg:26,ip:.44,pc:80,hp:"partial"},
+WV:{n:"West Virginia",wi:0.8134,m:{Charleston:{wi:0.8312}},med:0.68,con:{r:1,d:"high",c:1},cr:{fp:0,s:40},asc:{t:35,p:1.96,o:{i:.38,c:.42,h:.20}},d:{pop:1.77,g:-0.5,a:.40,u:.06,e:.46,ma:.50,ob:.388,ca:490,ms:.30},hc:.60,vb:30,rn:800,tk:30,cl:84,sg:18,ip:.40,pc:62,hp:"full"},
+WI:{n:"Wisconsin",wi:0.9456,m:{Milwaukee:{wi:0.9812},Madison:{wi:0.9634}},med:0.68,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:115,p:1.96,o:{i:.35,c:.40,h:.25}},d:{pop:5.90,g:0.1,a:.37,u:.05,e:.54,ma:.42,ob:.340,ca:440,ms:.27},hc:.55,vb:60,rn:890,tk:35,cl:95,sg:24,ip:.45,pc:76,hp:"partial"},
+WY:{n:"Wyoming",wi:0.8912,m:{Cheyenne:{wi:0.8912}},med:0.68,con:{r:0,d:"none",c:0},cr:{fp:1,s:100},asc:{t:10,p:1.73,o:{i:.50,c:.30,h:.20}},d:{pop:0.58,g:0.2,a:.36,u:.09,e:.50,ma:.38,ob:.282,ca:400,ms:.26},hc:.60,vb:30,rn:810,tk:26,cl:96,sg:16,ip:.55,pc:58,hp:"full"},
+DC:{n:"District of Columbia",wi:1.1678,m:{Washington:{wi:1.1678}},med:0.72,con:{r:0,d:"none",c:0},cr:{fp:0,s:40},asc:{t:12,p:1.72,o:{i:.25,c:.35,h:.40}},d:{pop:0.69,g:0.5,a:.30,u:.04,e:.52,ma:.30,ob:.248,ca:410,ms:.22},hc:.65,vb:80,rn:980,tk:40,cl:148,sg:35,ip:.30,pc:102,hp:"none"}
+};
+SD["SD"]=SD["SDD"];delete SD["SDD"];
+
+const SPECS={orthopedic:{n:"Orthopedic Surgery",ic:"\u{1F9B4}"},general_surgery:{n:"General Surgery",ic:"\u{1F3E5}"},gi:{n:"Gastroenterology",ic:"\u{1F52C}"},womens_health:{n:"Women's Health",ic:"\u2640"},oncology:{n:"Oncology Surgery",ic:"\u{1F9EA}"},urology:{n:"Urology",ic:"\u{1FA7A}"}};
+
+const PD={
+orthopedic:{total_knee:{n:"Total Knee Replacement",ae:1,h:{s:{w:1.91},c:{w:2.38},m:{w:3.45}},a:{p:3724},co:[12e3,22e3],mm:.63,pm:2.10},total_hip:{n:"Total Hip Replacement",ae:1,h:{s:{w:1.91},c:{w:2.38},m:{w:3.45}},a:{p:3650},co:[13e3,23e3],mm:.63,pm:2.10},rotator_cuff:{n:"Rotator Cuff Repair",ae:1,h:{s:{w:1.28},c:{w:1.68},m:{w:2.42}},a:{p:1777},co:[6e3,12e3],mm:.65,pm:2.20},acl:{n:"ACL Reconstruction",ae:1,h:{s:{w:1.28},c:{w:1.68},m:{w:2.42}},a:{p:1597},co:[5e3,10e3],mm:.65,pm:2.20},spinal_fusion:{n:"Spinal Fusion 1-2 Lvl",ae:1,h:{s:{w:3.12},c:{w:3.89},m:{w:5.67}},a:{p:4708},co:[18e3,35e3],mm:.62,pm:2.00},carpal:{n:"Carpal Tunnel Release",ae:1,h:{s:{w:0.72},c:{w:0.95},m:{w:1.38}},a:{p:544},co:[2e3,4e3],mm:.68,pm:2.30}},
+general_surgery:{lap_chole:{n:"Lap Cholecystectomy",ae:1,h:{s:{w:1.24},c:{w:1.62},m:{w:2.35}},a:{p:1354},co:[4e3,9e3],mm:.65,pm:2.15},hernia:{n:"Lap Inguinal Hernia",ae:1,h:{s:{w:1.08},c:{w:1.42},m:{w:2.05}},a:{p:1150},co:[3500,7500],mm:.66,pm:2.20},appendectomy:{n:"Lap Appendectomy",ae:1,h:{s:{w:1.15},c:{w:1.52},m:{w:2.18}},a:{p:1222},co:[4e3,8e3],mm:.65,pm:2.15},thyroidectomy:{n:"Thyroidectomy",ae:1,h:{s:{w:1.32},c:{w:1.74},m:{w:2.50}},a:{p:1459},co:[5e3,10e3],mm:.64,pm:2.10},mastectomy:{n:"Simple Mastectomy",ae:1,h:{s:{w:1.18},c:{w:1.55},m:{w:2.24}},a:{p:1261},co:[5e3,10e3],mm:.64,pm:2.10}},
+gi:{colonoscopy:{n:"Colonoscopy w/ Polypectomy",ae:1,h:{s:{w:0.68},c:{w:0.89},m:{w:1.28}},a:{p:432},co:[1200,2800],mm:.68,pm:2.30},egd:{n:"Upper Endoscopy (EGD)",ae:1,h:{s:{w:0.62},c:{w:0.82},m:{w:1.18}},a:{p:384},co:[1e3,2400],mm:.68,pm:2.30},ercp:{n:"ERCP w/ Intervention",ae:0,h:{s:{w:1.85},c:{w:2.31},m:{w:3.34}},a:{p:0},co:[5e3,12e3],mm:.65,pm:2.10},hemorrhoid:{n:"Hemorrhoidectomy",ae:1,h:{s:{w:0.82},c:{w:1.08},m:{w:1.56}},a:{p:564},co:[2e3,4500],mm:.67,pm:2.25}},
+womens_health:{lap_hyst:{n:"Lap Hysterectomy",ae:1,h:{s:{w:1.42},c:{w:1.87},m:{w:2.71}},a:{p:1968},co:[6e3,14e3],mm:.66,pm:2.15},dc:{n:"D&C",ae:1,h:{s:{w:0.65},c:{w:0.86},m:{w:1.24}},a:{p:376},co:[1e3,2500],mm:.68,pm:2.30},tubal:{n:"Tubal Ligation (Lap)",ae:1,h:{s:{w:0.65},c:{w:0.86},m:{w:1.24}},a:{p:470},co:[1500,3500],mm:.67,pm:2.25},myomectomy:{n:"Lap Myomectomy",ae:1,h:{s:{w:1.42},c:{w:1.87},m:{w:2.71}},a:{p:1669},co:[5e3,12e3],mm:.66,pm:2.15}},
+oncology:{lumpectomy:{n:"Breast Lumpectomy",ae:1,h:{s:{w:1.18},c:{w:1.55},m:{w:2.24}},a:{p:1045},co:[3500,7500],mm:.60,pm:2.00},colectomy:{n:"Partial Colectomy (Lap)",ae:0,h:{s:{w:2.15},c:{w:2.68},m:{w:3.88}},a:{p:0},co:[12e3,25e3],mm:.60,pm:1.95},prostatectomy:{n:"Radical Prostatectomy",ae:0,h:{s:{w:1.78},c:{w:2.22},m:{w:3.21}},a:{p:0},co:[10e3,20e3],mm:.60,pm:2.00},skin_exc:{n:"Wide Excision Skin Lesion",ae:1,h:{s:{w:0.85},c:{w:1.12},m:{w:1.62}},a:{p:464},co:[2e3,5e3],mm:.62,pm:2.15}},
+urology:{turp:{n:"TURP",ae:1,h:{s:{w:1.78},c:{w:2.22},m:{w:3.21}},a:{p:1570},co:[5e3,11e3],mm:.63,pm:2.10},cystoscopy:{n:"Cystoscopy w/ Biopsy",ae:1,h:{s:{w:0.55},c:{w:0.72},m:{w:1.04}},a:{p:310},co:[800,2e3],mm:.66,pm:2.30},lithotripsy:{n:"Ureteroscopy/Lithotripsy",ae:1,h:{s:{w:1.22},c:{w:1.60},m:{w:2.32}},a:{p:1261},co:[4e3,9e3],mm:.64,pm:2.15},circumcision:{n:"Circumcision (Adult)",ae:1,h:{s:{w:0.48},c:{w:0.63},m:{w:0.91}},a:{p:287},co:[600,1500],mm:.68,pm:2.30}}
+};
+
+const NA={asc_p:2.15,sg:23.5,pc:73,a45:.35,rn:860,tk:34,cl:100,ip:.43,ppa:34};
+const dimN=["Demand & Shift","Surgeon Supply","Payor Ecosystem","Reimbursement","Competition","Demographics","Operations"];
+const dimI=["\u{1F4C8}","\u{1F468}\u200D\u2695\uFE0F","\u{1F4B3}","\u{1F4B0}","\u{1F3E5}","\u{1F465}","\u2699\uFE0F"];
+
+function sD1(st,specs){const d=st.d,vs=cl((d.pop*10)/33*60);let ae=0,tc=0;specs.forEach(s=>{Object.values(PD[s]||{}).forEach(p=>{tc++;if(p.ae)ae++;});});const ss=cl(tc>0?ae/tc*150:0),gs=cl(50+d.g*40);return Math.round(vs*.45+ss*.35+gs*.20);}
+function sD2(st){const dr=st.sg/NA.sg;let ds;if(dr<.5)ds=dr*80;else if(dr<1)ds=40+(dr-.5)*120;else if(dr<1.5)ds=100;else ds=Math.max(50,100-(dr-1.5)*60);return Math.round(ds*.30+cl(st.ip*120)*.35+cl(st.pc/st.sg*10)*.20+(st.hp==="full"?85:st.hp==="partial"?65:40)*.15);}
+function sD3(st){const d=st.d;return Math.round(cl((d.e*100)*.6+60*.4)*.30+cl(d.ma*200)*.25+cl((d.e+.25)*120)*.25+st.vb*.20);}
+function sD4(st,specs,pm,wi){let th=0,cnt=0;specs.forEach(s=>{Object.values(PD[s]||{}).forEach(p=>{const mc=calcMP(wi,p.h.s.w);th+=mc*(pm.medicare/100)+mc*(st.med+(p.mm-.65))*(pm.medicaid/100)+mc*p.pm*(pm.private/100);cnt++;});});const bs=cl(cnt>0?(th/cnt/15000)*70:0);const ae=specs.flatMap(s=>Object.values(PD[s]||{}).filter(p=>p.ae&&p.a.p>0));let ds=50;if(ae.length>0){ds=cl(ae.reduce((s,p)=>{const hp=calcMP(wi,p.h.s.w);return s+(hp-p.a.p)/hp;},0)/ae.length*150);}return Math.round(bs*.40+ds*.35+60*.25);}
+function sD5(st){const r=st.asc.p/NA.asc_p;let ds;if(r<.6)ds=40+r*30;else if(r<=1.4)ds=80+(1-Math.abs(r-1))*20;else ds=Math.max(20,80-(r-1.4)*80);let dm;if(st.hc>.70)dm=90;else if(st.hc>.50)dm=75;else if(st.hc>.30)dm=55;else dm=35;return Math.round(ds*.30+dm*.30+70*.25+cl(st.pc*st.d.pop*10000/st.asc.t/NA.ppa*15)*.15);}
+function sD6(st){return Math.round(cl(50+st.d.g*40)*.20+cl(st.d.a/NA.a45*70)*.30+cl((1-st.d.u)*105)*.20+cl((st.d.ob/.32*50+st.d.ca/440*50)/2*1.2)*.30);}
+function sD7(st){let cn;if(!st.con.r)cn=100;else if(st.con.d==="moderate")cn=50;else cn=15;let sc=Math.round(cn*.35+cl(((st.rn/NA.rn)+(st.tk/NA.tk))/2*70)*.25+st.cr.s*.20+cl(130-st.cl*.30)*.20);if(st.con.c)sc=Math.min(sc,50);return sc;}
+
+let state={st:"",city:"",specs:[],pm:{medicare:40,medicaid:15,private:40,selfpay:5},fac:50000,staff:80000,vol:200,sup:500,computed:null,weights:[25,20,20,15,10,5,5],theme:"light",tab:"overview",expDim:null};
+
+function render(){
+  const S=state,dk=S.theme==="dark",stObj=SD[S.st]||null;
+  const wi=stObj?(S.city&&stObj.m[S.city]?stObj.m[S.city].wi:stObj.wi):1.0;
+  const metros=stObj?Object.keys(stObj.m):[];
+  document.documentElement.setAttribute('data-theme',S.theme);
+
+  let html=`
+  <div class="header"><div class="header-inner"><div>
+    <div class="logo-row"><div class="weave"><span></span><span></span><span></span><span></span><span></span></div>
+    <span class="logo-text">Oath Surgical</span></div>
+    <h1>ASC Market <span style="color:#34D399">Alignment Evaluator</span></h1>
+    <p>Multi-specialty reimbursement &amp; 7-dimension market scoring &middot; 50 states + DC</p>
+  </div><div class="header-btns">
+    <button class="hbtn" onclick="window.print()">&#x1F5A8; Print</button>
+    <button class="hbtn" onclick="toggleTheme()">${dk?'&#x2600;&#xFE0F; Light':'&#x1F319; Dark'}</button>
+  </div></div></div>
+
+  <div class="layout ${S.computed?'':'single'}">
+  <div class="panel-l">
+    <div style="margin-bottom:22px">
+      <div class="step-hd"><span class="step-num">1</span> Location</div>
+      <label class="lbl">State</label>
+      <select onchange="setState(this.value)">${'<option value="">Select a state...</option>'+Object.entries(SD).sort((a,b)=>a[1].n.localeCompare(b[1].n)).map(([k,v])=>'<option value="'+k+'"'+(S.st===k?' selected':'')+'>'+v.n+'</option>').join('')}</select>
+      ${metros.length>0?'<div style="margin-top:10px"><label class="lbl">Metro Area</label><select onchange="setCity(this.value)"><option value="">State avg ('+stObj.wi+')</option>'+metros.map(m=>'<option value="'+m+'"'+(S.city===m?' selected':'')+'>'+m+' ('+stObj.m[m].wi+')</option>').join('')+'</select></div>':''}
+      ${stObj?'<div class="wi-badge">WI: <strong>'+wi+'</strong> &middot; Adj: <strong>'+calcWA(wi).toFixed(4)+'</strong>'+(wi<1?' &middot; '+((1-calcWA(wi))*100).toFixed(1)+"% below nat'l avg":'')+'</div>':''}
+    </div>
+
+    <div style="margin-bottom:22px">
+      <div class="step-hd"><span class="step-num">2</span> Specialties</div>
+      <div class="spec-grid">${Object.entries(SPECS).map(([k,v])=>'<button class="spec-btn'+(S.specs.includes(k)?' active':'')+'" onclick="toggleSpec(\''+k+'\')">'+v.ic+' '+v.n.split('/')[0].split('(')[0].trim()+'</button>').join('')}</div>
+    </div>
+
+    <div style="margin-bottom:22px">
+      <div class="step-hd"><span class="step-num">3</span> Financials</div>
+      <div class="fin-grid">
+        ${[{l:'Mo. Facility Cost',k:'fac',v:S.fac},{l:'Mo. Staffing Cost',k:'staff',v:S.staff},{l:'Mo. Case Volume',k:'vol',v:S.vol},{l:'Supply / Case',k:'sup',v:S.sup}].map(f=>'<div><label class="lbl">'+f.l+'</label><input type="number" value="'+f.v+'" onchange="setFin(\''+f.k+'\',this.value)"></div>').join('')}
+      </div>
+      <div style="margin-top:12px"><label class="lbl">Payor Mix (%)</label>
+      <div class="pm-grid">${[{k:'medicare',l:'MCare'},{k:'medicaid',l:'MCaid'},{k:'private',l:'Priv'},{k:'selfpay',l:'Self'}].map(p=>'<div><div class="pm-lbl">'+p.l+'</div><input type="number" class="pm-inp" value="'+S.pm[p.k]+'" min="0" max="100" onchange="setPM(\''+p.k+'\',this.value)"></div>').join('')}</div>
+      ${Object.values(S.pm).reduce((a,b)=>a+b,0)!==100?'<div class="err">Must total 100% (now: '+Object.values(S.pm).reduce((a,b)=>a+b,0)+'%)</div>':''}
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="compute()"${!S.st||S.specs.length===0?' disabled':''}>Evaluate Market</button>
+    ${!S.st||S.specs.length===0?'<div class="hint">'+(! S.st?'Select a state':'Select &ge;1 specialty')+'</div>':''}
+  </div>`;
+
+  if(S.computed){
+    const C=S.computed,F=C.fin;
+    html+='<div class="panel-r">';
+    html+='<div class="tab-bar">'+[{k:'overview',l:'Overview'},{k:'procedures',l:'Procedures'},{k:'sensitivity',l:'Sensitivity'},{k:'weights',l:'Weights'},{k:'methodology',l:'Show the Math'}].map(t=>'<button class="tab-btn'+(S.tab===t.k?' active':'')+'" onclick="setTab(\''+t.k+'\')">'+t.l+'</button>').join('')+'</div>';
+
+    if(S.tab==='overview'){
+      const sc=C.composite;
+      const gaugeC=sc>=75?'#0D9668':sc>=55?'#D4920A':'#DC3545';
+      const verdict=sc>=80?"Strong":sc>=66?"Favorable":sc>=50?"Mixed":sc>=40?"Below Avg":"Weak";
+      const sz=160,r=sz/2-14,circ=2*Math.PI*r,arc=circ*.75,filled=arc*(sc/100);
+      const gSVG='<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+(dk?'#2D3B35':'#D9E2DD')+'" stroke-width="12" stroke-dasharray="'+arc+' '+(circ-arc)+'" stroke-dashoffset="'+(-circ*.125)+'" stroke-linecap="round" transform="rotate(135 '+sz/2+' '+sz/2+')"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+gaugeC+'" stroke-width="12" stroke-dasharray="'+filled+' '+(circ-filled)+'" stroke-dashoffset="'+(-circ*.125)+'" stroke-linecap="round" transform="rotate(135 '+sz/2+' '+sz/2+')" style="transition:stroke-dasharray 1s ease"/><text x="'+sz/2+'" y="'+(sz/2-8)+'" text-anchor="middle" font-size="38" font-weight="900" fill="'+gaugeC+'" font-family="Georgia,serif">'+sc+'</text><text x="'+sz/2+'" y="'+(sz/2+14)+'" text-anchor="middle" font-size="12" font-weight="700" fill="var(--txd)">'+verdict+'</text></svg>';
+
+      const rsz=240,rcx=rsz/2,rcy=rsz/2,rr=rsz/2-44,rn=7;
+      const rpt=(v,i)=>{const a=(Math.PI*2*i/rn)-Math.PI/2;return[rcx+rr*(v/100)*Math.cos(a),rcy+rr*(v/100)*Math.sin(a)];};
+      const rpoly=vals=>vals.map((_,i)=>rpt(vals[i],i).join(',')).join(' ');
+      let rSVG='<svg width="'+rsz+'" height="'+rsz+'" viewBox="0 0 '+rsz+' '+rsz+'">';
+      [25,50,75,100].forEach(lv=>{rSVG+='<polygon points="'+rpoly(Array(rn).fill(lv))+'" fill="none" stroke="'+(dk?'#2D3B35':'#D9E2DD')+'" stroke-width=".5"/>';});
+      C.scores.forEach((_,i)=>{const[lx,ly]=rpt(110,i);rSVG+='<text x="'+lx+'" y="'+ly+'" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="var(--txd)" font-weight="600">'+dimN[i].split(' ')[0]+'</text>';});
+      rSVG+='<polygon points="'+rpoly(C.scores)+'" fill="rgba(13,150,104,0.15)" stroke="#0D9668" stroke-width="2"/>';
+      C.scores.forEach((_,i)=>{const[x,y]=rpt(C.scores[i],i);rSVG+='<circle cx="'+x+'" cy="'+y+'" r="4" fill="#0D9668" stroke="'+(dk?'#0F1613':'white')+'" stroke-width="2"/>';});
+      rSVG+='</svg>';
+
+      const pc=F.mProfit>=0?'var(--ev)':'var(--red)',mc=F.margin>=0?'var(--ev)':'var(--red)';
+
+      html+='<div style="display:flex;gap:20px;margin-bottom:24px;flex-wrap:wrap"><div class="card" style="flex:1 1 280px;min-width:260;margin-bottom:0"><div style="display:flex;align-items:center;gap:20px">'+gSVG+'<div><div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--txd);margin-bottom:3px">Market Alignment</div><div style="font-family:Georgia,serif;font-weight:900;font-size:16px;margin-bottom:6px">'+stObj.n+(S.city?' &mdash; '+S.city:'')+'</div><div style="font-size:12px;line-height:1.5;color:var(--txd)">'+C.verdict+'</div></div></div></div><div class="card" style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;margin-bottom:0">'+rSVG+'</div></div>';
+
+      html+='<div class="card"><div class="card-title">Monthly Financial Projection</div><div class="metric-row">'+[{l:'Revenue',v:fmtK(F.mRev),c:'var(--ev)'},{l:'Costs',v:fmtK(F.mCost),c:'var(--red)'},{l:'Profit',v:fmtK(F.mProfit),c:pc},{l:'Margin',v:fmtP(F.margin),c:mc},{l:'Breakeven',v:F.be===Infinity?'N/A':Math.ceil(F.be)+' cases',c:'var(--blu)'},{l:'Blended/Case',v:fmt(F.bl),c:'var(--pur)'}].map(m=>'<div class="metric"><div class="m-label">'+m.l+'</div><div class="m-val" style="color:'+m.c+'">'+m.v+'</div></div>').join('')+'</div></div>';
+
+      html+='<div style="font-family:Fraunces,Georgia,serif;font-weight:700;font-size:15px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:10px">7-Dimension Breakdown</div>';
+      dimN.forEach((name,i)=>{
+        const dsc=C.scores[i],dc=dsc>=75?'#0D9668':dsc>=55?'#D4920A':'#DC3545';
+        const isExp=S.expDim===i;
+        let detail='';
+        if(isExp){
+          if(i===0){const ae=S.specs.flatMap(sp=>Object.values(PD[sp]||{}).filter(p=>p.ae)).length,tc=S.specs.flatMap(sp=>Object.values(PD[sp]||{})).length;detail='<p><strong>Population:</strong> '+stObj.d.pop+'M &middot; <strong>Growth:</strong> '+(stObj.d.g>0?'+':'')+stObj.d.g+'%/yr</p><p><strong>ASC-Eligible:</strong> '+ae+'/'+tc+' ('+(tc>0?(ae/tc*100).toFixed(0):0)+'%)</p>';}
+          else if(i===1)detail='<p><strong>Surgeons/100K:</strong> '+stObj.sg+' (avg: '+NA.sg+')</p><p><strong>Independent:</strong> '+(stObj.ip*100).toFixed(0)+'%</p><p><strong>PCP:Surgeon:</strong> '+(stObj.pc/stObj.sg).toFixed(1)+':1</p><p><strong>HPSA:</strong> '+(stObj.hp==='full'?'Full shortage':stObj.hp==='partial'?'Partial':'None')+'</p>';
+          else if(i===2)detail='<p><strong>Employer-Insured:</strong> '+(stObj.d.e*100).toFixed(0)+'%</p><p><strong>MA Penetration:</strong> '+(stObj.d.ma*100).toFixed(0)+'%</p><p><strong>Uninsured:</strong> '+(stObj.d.u*100).toFixed(0)+'%</p><p><strong>VBC Readiness:</strong> '+(stObj.vb>=70?'High':stObj.vb>=45?'Moderate':'Low')+' ('+stObj.vb+')</p>';
+          else if(i===3){detail='<p><strong>Adj Base Rate:</strong> '+fmt(NBR*calcWA(wi))+'</p><p><strong>Medicaid/Medicare:</strong> '+(stObj.med*100).toFixed(0)+'%</p>'+buildProcTable(S.specs.flatMap(sp=>Object.values(PD[sp]||{})),wi);}
+          else if(i===4)detail='<p><strong>ASCs:</strong> '+stObj.asc.t+' ('+stObj.asc.p+'/100K)</p><p><strong>Ownership:</strong> Ind '+(stObj.asc.o.i*100).toFixed(0)+'% &middot; Corp '+(stObj.asc.o.c*100).toFixed(0)+'% &middot; Hosp '+(stObj.asc.o.h*100).toFixed(0)+'%</p><p><strong>Hosp Concentration:</strong> '+(stObj.hc*100).toFixed(0)+'%</p>';
+          else if(i===5)detail='<p><strong>Age 45-75:</strong> '+(stObj.d.a*100).toFixed(0)+'%</p><p><strong>Obesity:</strong> '+(stObj.d.ob*100).toFixed(1)+'%</p><p><strong>Cancer/100K:</strong> '+stObj.d.ca+'</p><p><strong>MSK:</strong> '+(stObj.d.ms*100).toFixed(0)+'%</p>';
+          else if(i===6)detail='<p><strong>CON for ASC:</strong> '+(stObj.con.r?'Yes &mdash; '+stObj.con.d:'No')+(stObj.con.c?' <span style="color:var(--red);font-weight:700">(caps at 50)</span>':'')+'</p><p><strong>CRNA:</strong> '+(stObj.cr.fp?'Full Practice Authority':'Supervision Required')+'</p><p><strong>RN/100K:</strong> '+stObj.rn+' &middot; <strong>Techs:</strong> '+stObj.tk+'</p><p><strong>COL Index:</strong> '+stObj.cl+'</p>';
+        }
+        html+='<div class="dim-card'+(isExp?' expanded':'')+'" onclick="toggleDim('+i+')"><div class="dim-header"><div class="dim-left"><span style="font-size:16px">'+dimI[i]+'</span><span class="dim-name">'+(i+1)+'. '+name+'</span><span class="dim-wt">('+S.weights[i]+'%)</span></div><div class="dim-right"><div class="dim-bar"><div class="dim-bar-fill" style="width:'+dsc+'%;background:'+dc+'"></div></div><span class="dim-score" style="color:'+dc+'">'+dsc+'</span></div></div>'+(isExp?'<div class="dim-detail">'+detail+'</div>':'')+'</div>';
+      });
+    }
+
+    if(S.tab==='procedures'){
+      html+='<div style="font-family:Fraunces,Georgia,serif;font-weight:700;font-size:15px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:16px">Procedure-Level Reimbursement</div>';
+      S.specs.forEach(sp=>{html+='<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:8px">'+SPECS[sp].ic+' '+SPECS[sp].n+'</div>'+buildProcTable(Object.values(PD[sp]||{}),wi)+'</div>';});
+      html+='<div class="callout green"><strong>How to read:</strong> "Hospital" is IPPS Medicare payment at your wage index. "ASC" is CMS facility fee. The "Delta" is the economic opportunity Oath captures.</div>';
+    }
+
+    if(S.tab==='sensitivity'){
+      const sens=C.sensitivity,volS=sens.filter(s=>s.type==='volume'),payS=sens.filter(s=>s.type==='payor');
+      html+='<div style="font-family:Fraunces,Georgia,serif;font-weight:700;font-size:15px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:6px">Sensitivity Analysis</div><div style="font-size:12px;color:var(--txd);margin-bottom:16px">How do changes in volume and payor mix impact your bottom line?</div><div class="card">'+buildSensTable(volS,'Volume Sensitivity (&plusmn;20%)')+buildSensTable(payS,'Payor Mix Shift (&plusmn;10pt)')+'</div><div class="callout amber"><strong>Key insight:</strong> A 10-point shift from Private to Medicaid typically impacts margins more than a 20% volume reduction.</div>';
+    }
+
+    if(S.tab==='weights'){
+      html+='<div style="font-family:Fraunces,Georgia,serif;font-weight:700;font-size:15px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:6px">Adjust Dimension Weights</div><div style="font-size:12px;color:var(--txd);margin-bottom:16px">Customize each dimension\'s contribution to the composite score.</div><div class="card">'+dimN.map((name,i)=>'<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:13px;font-weight:600">'+dimI[i]+' '+name+'</span><span style="font-size:13px;font-weight:700;color:'+(dk?'var(--spr)':'var(--ev)')+'">'+S.weights[i]+'%</span></div><input type="range" class="weight-slider" min="0" max="50" value="'+S.weights[i]+'" oninput="setWeight('+i+',this.value)"></div>').join('')+'<div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--bd);margin-top:8px"><span style="font-size:13px;font-weight:700">Total Weight</span><span style="font-size:13px;font-weight:700;color:'+(S.weights.reduce((a,b)=>a+b,0)===100?'var(--ev)':'var(--red)')+'">'+S.weights.reduce((a,b)=>a+b,0)+'%</span></div><button class="btn-calc" style="margin-top:16px" onclick="compute()">Recalculate</button></div>';
+    }
+
+    if(S.tab==='methodology'){
+      html+='<div style="font-family:Fraunces,Georgia,serif;font-weight:700;font-size:15px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:16px">How These Numbers Were Calculated</div>';
+      html+='<div class="card"><div style="font-weight:700;font-size:14px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:10px">IPPS Hospital Payment Formula</div><div style="font-size:13px;line-height:1.7;color:var(--txd)"><p>Medicare pays hospitals via IPPS &mdash; a fixed amount per diagnosis, not per item used.</p><div class="formula"><span class="hl">Payment = Base Rate &times; Wage Adj &times; DRG Weight</span><br><span class="dim-text">Wage Adj = ('+LS+' &times; '+wi+') + '+(1-LS).toFixed(3)+' = <strong class="hl">'+calcWA(wi).toFixed(4)+'</strong></span><br><span class="dim-text">Adj Base = '+fmt(NBR)+' &times; '+calcWA(wi).toFixed(4)+' = <strong class="hl">'+fmt(NBR*calcWA(wi))+'</strong></span></div></div></div>';
+      html+='<div class="card"><div style="font-weight:700;font-size:14px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:10px">ASC Payment Formula</div><div style="font-size:13px;line-height:1.7;color:var(--txd)"><p>ASCs are paid per-procedure via CPT codes.</p><div class="formula"><span class="hl">ASC Payment = Conversion Factor &times; Relative Weight</span><br><span class="dim-text">FY 2025 CF = $55.27</span><br><span class="dim-text">Example: Total Knee (CPT 27447) = $55.27 &times; 67.38 = <strong class="hl">$3,724</strong></span></div><p style="font-size:12px;color:var(--txm);margin-top:6px">ASC payment covers facility fees only. Surgeon and anesthesia billed separately.</p></div></div>';
+      html+='<div class="card"><div style="font-weight:700;font-size:14px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:10px">Composite Scoring</div><div style="font-size:13px;line-height:1.7;color:var(--txd)"><div class="formula">'+dimN.map((n,i)=>'<span class="dim-text">'+n+': <strong class="hl">'+C.scores[i]+'</strong> &times; '+S.weights[i]+'% = '+(C.scores[i]*S.weights[i]/100).toFixed(1)+'</span><br>').join('')+'<div style="border-top:1px solid var(--bd);margin-top:6px;padding-top:6px"><strong class="hl">Composite = '+C.composite+'</strong></div></div></div></div>';
+      html+='<div class="card"><div style="font-weight:700;font-size:14px;color:'+(dk?'var(--spr)':'var(--evd)')+';margin-bottom:10px">Data Sources</div><div style="font-size:12px;line-height:1.8;color:var(--txd)">'+[["CMS IPPS Final Rule FY 2025/2026","DRG weights, base rates, wage indices"],["CMS ASC Payment System FY 2025","ASC relative weights, CF ($55.27)"],["KFF Medicaid-to-Medicare Fee Index","State-level ratios"],["NCSL & Mercatus Center","CON law tracking"],["AANA","CRNA scope of practice"],["CMS Provider of Services File","ASC counts/ownership"],["RAND Price Transparency Study","Commercial rate multiples"],["Census, BLS, HRSA, CDC","Population, workforce, health data"]].map(([s,d],i)=>'<p><strong>['+(i+1)+']</strong> '+s+' &mdash; '+d+'</p>').join('')+'</div></div>';
+    }
+
+    html+='<div class="footer">Oath Surgical &middot; ASC Market Evaluator v1.0<br>For internal planning use only. Verify against actual payer contracts.</div></div>';
+  }
+  html+='</div>';
+  document.getElementById('app').innerHTML=html;
+}
+
+function buildProcTable(procs,wi){
+  let h='<table class="proc-table"><thead><tr><th>Procedure</th><th>Hosp (Medicare)</th><th>ASC Pay</th><th>Delta</th><th>Eligible</th></tr></thead><tbody>';
+  procs.forEach(p=>{const hp=calcMP(wi,p.h.s.w),ap=p.ae?p.a.p:0,d=hp-ap,dp=hp>0?(d/hp*100):0;h+='<tr><td style="font-weight:500">'+p.n+'</td><td>'+fmt(hp)+'</td><td>'+(p.ae?fmt(ap):'&mdash;')+'</td><td style="color:'+(p.ae?'var(--ev)':'var(--txm)')+';font-weight:'+(p.ae?700:400)+'">'+(p.ae?fmt(d)+' ('+dp.toFixed(0)+'%)':'&mdash;')+'</td><td><span class="badge '+(p.ae?'yes':'no')+'">'+(p.ae?'Yes':'No')+'</span></td></tr>';});
+  h+='</tbody></table>';return h;
+}
+
+function buildSensTable(rows,title){
+  let h='<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:var(--txd);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">'+title+'</div><table class="sens-table"><thead><tr><th style="text-align:left">Scenario</th><th>Volume</th><th>Revenue</th><th>Costs</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
+  rows.forEach(r=>{const pc=r.profit>=0?'var(--ev)':'var(--red)',isBase=r.label.includes('Base')||r.label==='Vol +0%';h+='<tr'+(isBase?' class="base"':'')+'><td>'+r.label+'</td><td>'+r.vol+'</td><td>'+fmtK(r.rev)+'</td><td>'+fmtK(r.cost)+'</td><td style="color:'+pc+';font-weight:700">'+fmtK(r.profit)+'</td><td style="color:'+pc+';font-weight:700">'+fmtP(r.margin)+'</td></tr>';});
+  h+='</tbody></table></div>';return h;
+}
+
+function setState(v){state.st=v;state.city='';state.computed=null;render();}
+function setCity(v){state.city=v;render();}
+function toggleSpec(k){const i=state.specs.indexOf(k);if(i>=0)state.specs.splice(i,1);else state.specs.push(k);state.computed=null;render();}
+function setFin(k,v){state[k]=parseFloat(v)||0;render();}
+function setPM(k,v){state.pm[k]=parseInt(v)||0;render();}
+function setTab(t){state.tab=t;render();}
+function toggleDim(i){state.expDim=state.expDim===i?null:i;render();}
+function setWeight(i,v){state.weights[i]=parseInt(v);render();}
+function toggleTheme(){state.theme=state.theme==='light'?'dark':'light';render();}
+
+function compute(){
+  const S=state,st=SD[S.st];if(!st||S.specs.length===0)return;
+  const wi=S.city&&st.m[S.city]?st.m[S.city].wi:st.wi;
+  const scores=[sD1(st,S.specs),sD2(st),sD3(st),sD4(st,S.specs,S.pm,wi),sD5(st),sD6(st),sD7(st)];
+  const totalW=S.weights.reduce((a,b)=>a+b,0)||100;
+  const composite=Math.round(scores.reduce((sum,sc,i)=>sum+sc*(S.weights[i]/totalW),0));
+
+  const ascP=S.specs.flatMap(sp=>Object.values(PD[sp]||{}).filter(p=>p.ae&&p.a.p>0));
+  const avgA=ascP.length>0?ascP.reduce((s,p)=>s+p.a.p,0)/ascP.length:0;
+  const bl=avgA*(S.pm.medicare/100+S.pm.medicaid/100*st.med+S.pm.private/100*1.8+S.pm.selfpay/100*0.5);
+  const mRev=bl*S.vol,mCost=S.fac+S.staff+(S.sup*S.vol),mProfit=mRev-mCost;
+  const margin=mRev>0?(mProfit/mRev)*100:0;
+  const be=bl>S.sup?(S.fac+S.staff)/(bl-S.sup):Infinity;
+
+  const dn=["Procedure Demand","Surgeon Supply","Payor Ecosystem","Reimbursement","Competition","Demographics","Operations"];
+  const weakest=scores.indexOf(Math.min(...scores)),strongest=scores.indexOf(Math.max(...scores));
+  let verdict;
+  if(composite>=80)verdict='Strong multi-stakeholder alignment. '+dn[strongest]+' is your standout advantage.';
+  else if(composite>=66)verdict='Favorable market. '+dn[weakest]+' is a moderate risk worth monitoring.';
+  else if(composite>=50)verdict='Mixed signals. '+dn[weakest]+' and related factors need further investigation.';
+  else if(composite>=40)verdict='Below average. Significant headwinds in '+dn[weakest]+'.';
+  else verdict='Weak alignment. Consider alternative locations \u2014 '+dn[weakest]+' is a major barrier.';
+
+  const calcRev=(pm,vol)=>{const ap=S.specs.flatMap(s=>Object.values(PD[s]||{}).filter(p=>p.ae&&p.a.p>0));if(!ap.length)return 0;const avg=ap.reduce((s,p)=>s+p.a.p,0)/ap.length;return avg*(pm.medicare/100+pm.medicaid/100*st.med+pm.private/100*1.8+pm.selfpay/100*0.5)*vol;};
+  const calcCost=vol=>S.fac+S.staff+S.sup*vol;
+  const sens=[];
+  [-20,-10,0,10,20].forEach(vp=>{const v=Math.round(S.vol*(1+vp/100)),r=calcRev(S.pm,v),c=calcCost(v);sens.push({label:'Vol '+(vp>=0?'+':'')+vp+'%',vol:v,rev:r,cost:c,profit:r-c,margin:r>0?(r-c)/r*100:0,type:'volume'});});
+  [{pm:{...S.pm,medicaid:S.pm.medicaid+10,private:S.pm.private-10},label:'+10pt Medicaid'},{pm:S.pm,label:'Base Mix'},{pm:{...S.pm,private:S.pm.private+10,medicare:S.pm.medicare-10},label:'+10pt Private'}].forEach(({pm,label})=>{const r=calcRev(pm,S.vol),c=calcCost(S.vol);sens.push({label,vol:S.vol,rev:r,cost:c,profit:r-c,margin:r>0?(r-c)/r*100:0,type:'payor'});});
+
+  state.computed={scores,composite,verdict,sensitivity:sens,fin:{mRev,mCost,mProfit,margin,be,bl}};
+  state.tab='overview';state.expDim=null;
+  render();
+  document.querySelector('.panel-r')&&document.querySelector('.panel-r').scrollTo(0,0);
+}
+
+render();
+</script>
+</body>
+</html>
